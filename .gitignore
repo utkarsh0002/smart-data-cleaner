@@ -4,3 +4,6 @@ __pycache__/
 *.py[cod]
 .env
 .pytest_cache/
+# Generated output files
+output/*
+!output/.gitkeep

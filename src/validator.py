@@ -28,20 +28,39 @@ def validate_dataframe(df: pd.DataFrame) -> pd.DataFrame:
         record_number = index + 1
 
         # Report malformed CSV records.
+
         row_issue = row.get("_row_issue")
         extra_data = row.get("_extra_data")
 
-        if pd.notna(row_issue) and str(row_issue).strip():
+
+        if (
+            pd.notna(row_issue)
+            and str(row_issue).strip()
+            and row_issue != "Recovered embedded CSV record"
+        ):
+            issue_text = str(row_issue).strip()
+
+            if issue_text.startswith("Extra"):
+                message = (
+                    f"CSV record contains {issue_text.lower()}. "
+                    "Review the extra fields."
+                )
+            elif issue_text.startswith("Missing"):
+                message = (
+                    f"CSV record has {issue_text.lower()}. "
+                    "Check the missing fields."
+                )
+            else:
+                message = "CSV record has an incorrect number of fields."
+
             add_issue(
-                record_number, "_row_issue", "malformed_row",
-                row_issue, "CSV record has an incorrect number of fields."
+                record_number,
+                "_row_issue",
+                "malformed_row",
+                row_issue,
+                message,
             )
 
-        if pd.notna(extra_data) and str(extra_data).strip():
-            add_issue(
-                record_number, "_extra_data", "extra_data",
-                extra_data, "Extra fields need manual review."
-            )
 
         # Check required fields.
         for column in required_columns:
